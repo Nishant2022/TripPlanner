@@ -33,22 +33,23 @@ def get_nearby(latLong: str) -> str:
 
 @tool
 def get_location_info(location_id: str) -> str:
-    """A tool that returns information about a location. The input should be a location id string"""
+    """A tool that returns information about a location. The input should be a location id number without extra information."""
     url = f'https://api.content.tripadvisor.com/api/v1/location/{location_id}/details'
 
     headers = {"accept": "application/json"}
 
     response = requests.get(url, params={"key": TRIPADVISOR_API_KEY}, headers=headers).json()
-    print(response)
+    # print(response)
     return f"""
-Name: {response["name"]}
-Description: {response["description"]}
-Phone: {response["phone"]}
-Website: {response["website"]}
-Rating: {response["rating"]}
-Price Level: {response["price_level"]}
+Name: {response.get("name", None)}
+Description: {response.get("description", None)}
+Phone: {response.get("phone", None)}
+Website: {response.get("website", None)}
+Rating: {response.get("rating", None)}
+Price Level: {response.get("price_level", None)}
 Hours:
-Features: {response["features"]}
+Features: {response.get("features", None)}
+Amenities: {response.get("amenities", None)}
 """
 
 tools = [get_nearby, get_location_info]
