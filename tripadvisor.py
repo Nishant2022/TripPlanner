@@ -22,11 +22,9 @@ def get_nearby_attraction(latLong: str) -> str:
 
     headers = {"accept": "application/json"}
 
-    print(f'LatLong provided: {latLong}')
     response = requests.get(url, params={"latLong": latLong, "key": TRIPADVISOR_API_KEY, "category":"attractions"}, headers=headers).json()
  
     return_string = ""
-    print(response)
     for location in response['data']:
         return_string += f"Location ID: {location['location_id']}, Name: {location['name']}\n"
     return return_string
@@ -39,11 +37,9 @@ def get_nearby_hotel(latLong: str) -> str:
 
     headers = {"accept": "application/json"}
 
-    print(f'LatLong provided: {latLong}')
     response = requests.get(url, params={"latLong": latLong, "key": TRIPADVISOR_API_KEY, "category":"hotels"}, headers=headers).json()
  
     return_string = ""
-    print(response)
     for location in response['data']:
         return_string += f"Location ID: {location['location_id']}, Name: {location['name']}\n"
     return return_string
@@ -56,11 +52,9 @@ def get_nearby_restaurants(latLong: str) -> str:
 
     headers = {"accept": "application/json"}
 
-    print(f'LatLong provided: {latLong}')
     response = requests.get(url, params={"latLong": latLong, "key": TRIPADVISOR_API_KEY, "category":"restaurants"}, headers=headers).json()
  
     return_string = ""
-    print(response)
     for location in response['data']:
         return_string += f"Location ID: {location['location_id']}, Name: {location['name']}\n"
     return return_string
@@ -73,7 +67,6 @@ def get_location_info(location_id: str) -> str:
     headers = {"accept": "application/json"}
 
     response = requests.get(url, params={"key": TRIPADVISOR_API_KEY}, headers=headers).json()
-    # print(response)
     return f"""
 Name: {response.get("name", None)}
 Description: {response.get("description", None)}
@@ -95,9 +88,12 @@ zero_shot_agent = initialize_agent(
     tools=tools,
     llm=llm,
     verbose=True,
-    max_iterations=30
+    max_iterations=40
 )
 
 if __name__ == "__main__":
-    # print(get_location_info("2361377"))
-    zero_shot_agent("What are some hotels, restaurants, and attractions near Paris and give me more information about them?")
+    location = "Jersey City"
+    zero_shot_agent(f"""Give me 3 hotels, 5 restaurants, and 5 attractions near {location}.
+                    Your answer must include their names, descriptions, phone numbers, ratings, prices, and websites in list format.
+                    Each answer must include a description and price.
+                    Sort the answers by rating.""")
