@@ -16,7 +16,7 @@ TRIPADVISOR_API_KEY = os.environ.get("TRIPADVISOR_API_KEY")
 
 @tool
 def get_nearby(latLong: str) -> str:
-    """A tool that allows you to get attractions and restaurants close to a given lattitude and longitude pair. The input should just be a pair of floats without parentheses."""
+    """A tool that allows you to get attractions and restaurants close to a given lattitude and longitude pair. The input should just be a pair of floats that looks like this: 51.5074, -0.1278. Do not add any other text."""
 
     url = f'https://api.content.tripadvisor.com/api/v1/location/nearby_search'
 
@@ -65,4 +65,4 @@ zero_shot_agent = initialize_agent(
 
 if __name__ == "__main__":
     # print(get_location_info("2361377"))
-    zero_shot_agent("What are some locations near London and give me more information about them?")
+    zero_shot_agent("What are some locations near Paris and give me more information about them?")
