@@ -79,7 +79,21 @@ Features: {response.get("features", None)}
 Amenities: {response.get("amenities", None)}
 """
 
-tools = [get_nearby_attraction, get_location_info, get_nearby_hotel, get_nearby_restaurants]
+@tool 
+def get_location_reviews(location_id: str) -> str:
+    """A tool that returns reviews about one given location_id. The input should be a location id number without extra information."""
+    url = f'https://api.content.tripadvisor.com/api/v1/location/{location_id}/reviews'
+
+    headers = {"accept": "application/json"}
+
+    response = requests.get(url, params={"key": TRIPADVISOR_API_KEY}, headers=headers).json()
+    return_string = ""
+
+    for review in response['data']:
+        return_string += f"Location ID: {review['location_id']}, Rating: {review['rating']}, Title: {review['title']}, Review: {review['text']}\n"
+    return return_string
+
+tools = [get_nearby_attraction, get_location_info, get_nearby_hotel, get_nearby_restaurants, get_location_reviews]
 
 from langchain.agents import initialize_agent
 
@@ -92,8 +106,10 @@ zero_shot_agent = initialize_agent(
 )
 
 if __name__ == "__main__":
-    location = "Jersey City"
-    zero_shot_agent(f"""Give me 3 hotels, 5 restaurants, and 5 attractions near {location}.
-                    Your answer must include their names, descriptions, phone numbers, ratings, prices, and websites in list format.
-                    Each answer must include a description and price.
-                    Sort the answers by rating.""")
+    # print(get_location_info("2361377"))
+    location = "London"
+    zero_shot_agent(f"""Find me restaurants near {location}. Sort the restaurants by their rating. 
+                    For the three highest rated restaurants, give me three reviews.
+                    For each restaurant, sort the reviews in your answer by rating. Give the two highest rating reviews and the lowest rating review.
+                    For each review, your answer must include the name of the restaurant, the rating given by the review, the title of the review, and the text of the review in list format.
+                    """)
