@@ -93,7 +93,21 @@ def get_location_reviews(location_id: str) -> str:
         return_string += f"Location ID: {review['location_id']}, Rating: {review['rating']}, Title: {review['title']}, Review: {review['text']}\n"
     return return_string
 
-tools = [get_nearby_attraction, get_location_info, get_nearby_hotel, get_nearby_restaurants, get_location_reviews]
+@tool
+def get_location_photos(location_id: str) -> str:
+    """A tool that returns photos about one given location_id. The input should be a location id number without extra information."""
+    url = f'https://api.content.tripadvisor.com/api/v1/location/{location_id}/photos'
+
+    headers = {"accept": "application/json"}
+
+    response = requests.get(url, params={"key": TRIPADVISOR_API_KEY}, headers=headers).json()
+    return_string = ""
+
+    for photo in response['data']:
+        return_string += f"Location ID: {photo['id']}, Image: {photo['images']}, Caption: {photo['caption']}, Blessed: {photo['is_blessed']}\n"
+    return return_string
+
+tools = [get_nearby_attraction, get_location_info, get_nearby_hotel, get_nearby_restaurants, get_location_reviews, get_location_photos]
 
 from langchain.agents import initialize_agent
 
@@ -107,9 +121,11 @@ zero_shot_agent = initialize_agent(
 
 if __name__ == "__main__":
     # print(get_location_info("2361377"))
-    location = "London"
-    zero_shot_agent(f"""Find me restaurants near {location}. Sort the restaurants by their rating. 
-                    For the three highest rated restaurants, give me three reviews.
-                    For each restaurant, sort the reviews in your answer by rating. Give the two highest rating reviews and the lowest rating review.
-                    For each review, your answer must include the name of the restaurant, the rating given by the review, the title of the review, and the text of the review in list format.
-                    """)
+    location = "Seattle"
+    # zero_shot_agent(f"""Find me restaurants near {location}. Sort the restaurants by their rating. 
+    #                 For the three highest rated restaurants, give me three reviews.
+    #                 For each restaurant, sort the reviews in your answer by rating. Give the two highest rating reviews and the lowest rating review.
+    #                 For each review, your answer must include the name of the restaurant, the rating given by the review, the title of the review, and the text of the review in list format.
+    #                 """)
+    zero_shot_agent(f"""Find me one restaurant near {location}. Get one photo of this restaurant.
+                    For this photo, output a response in list format containing the location name, a link to the photo, the caption, and the blessed status of the photo.""")
