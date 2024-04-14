@@ -95,8 +95,6 @@ def getFlightInfo(flight_token: str) -> str:
 
     response = requests.get(url, headers=headers, params=querystring).json()
 
-    #print(json.dumps(response, indent=2))
-    
     return_string = f"Trip Price: ${response['data']['priceBreakdown']['total']['units']}\n"
     for segment in response.get('data', [])['segments']:
         return_string += f"\nFrom {segment['departureAirport']['cityName']} to {segment['arrivalAirport']['cityName']}:"
@@ -116,15 +114,15 @@ def getFlightInfo(flight_token: str) -> str:
 
 if __name__ == "__main__":
     from langchain.agents import initialize_agent
-    
+
     tools = [get_airport_id, getFlightToken, getFlightInfo]
-    
+
     llm = ChatOpenAI(
         openai_api_key=os.getenv("OPENAI_API_KEY"),
         temperature=0,
         model_name="gpt-3.5-turbo"
     )
-    
+
     zero_shot_agent = initialize_agent(
         agent="zero-shot-react-description",
         tools=tools,
@@ -132,7 +130,7 @@ if __name__ == "__main__":
         verbose=True,
         max_iterations=200
     )
-    
+
     zero_shot_agent("""I live in New York. I want to go to Mexico City for 14 days. I plan on leaving on May 1.
                     Can you find me the best flights? I want to know all the information there is to know about the flights you choose.
                     I want the flight itinerary in list form.

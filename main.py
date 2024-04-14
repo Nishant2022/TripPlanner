@@ -25,8 +25,6 @@ from langchain import hub
 from langchain.agents import AgentExecutor, create_react_agent, create_openai_tools_agent
 from langchain_community.document_loaders import PyPDFLoader, DirectoryLoader
 from langchain_community.vectorstores import FAISS
-from langchain_community.tools import WikipediaQueryRun
-from langchain_community.utilities import WikipediaAPIWrapper
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_text_splitters import CharacterTextSplitter
 from langchain.tools.retriever import create_retriever_tool
@@ -52,30 +50,12 @@ if 'generated' not in st.session_state:
 if 'past' not in st.session_state:
     st.session_state['past'] = ["Hey"]
 
-# Function to save uploaded file to a temporary directory
-def save_uploaded_file(uploaded_file):
-    # Create a new temporary directory for each file/session
-    if 'file_paths' not in st.session_state:
-        st.session_state['file_paths'] = {}
-
-    # Generate a temporary file name
-    with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_file:
-        # Write the uploaded file's contents to the temporary file
-        shutil.copyfileobj(uploaded_file, tmp_file)
-        st.session_state['file_paths'][uploaded_file.name] = tmp_file.name
-
-    return st.session_state['file_paths'][uploaded_file.name]
-
 # Create sidebar for saving locations
 st.sidebar.title("Saved Locations")
 locations = {}
 for location in locations:
     with st.sidebar:
         st.text(location)
-
-# Create a Wikipedia search tool
-api_wrapper = WikipediaAPIWrapper(top_k_results=1, doc_content_chars_max=100)
-wiki_tool = WikipediaQueryRun(api_wrapper=api_wrapper)
 
 # Initialize a LangChain chat agent
 llm = ChatOpenAI(temperature=0)
@@ -84,40 +64,6 @@ prompt = hub.pull("hwchase17/openai-tools-agent")
 
 agent = create_openai_tools_agent(llm, tools, prompt)
 agent_executor = AgentExecutor(agent=agent, tools=tools)
-
-# Create a new agent with a new retriever when a new file is uploaded
-# if uploaded_file is not None:
-#     # Save the uploaded file to a temporary directory
-#     file_path = save_uploaded_file(uploaded_file)
-
-#     # Load the pdf document
-#     loader = PyPDFLoader(file_path=file_path)
-#     documents = loader.load()
-
-#     # Split and embed the text in the documents
-#     text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
-#     texts = text_splitter.split_documents(documents)
-#     embeddings = OpenAIEmbeddings()
-
-#     # Store the embeddings in a database as local files
-#     db = FAISS.from_documents(texts, embeddings)
-#     db.save_local('vectorstore/db_faiss')
-#     retriever = db.as_retriever()
-
-#     # Create a tool for the agent that retrieves text from the database
-#     retriever_tool = create_retriever_tool(
-#         retriever,
-#         "search_documents",
-#         "Searches and returns excerpts from additional documents provided by users.",
-#     )
-
-#     # Initialize the new sagent
-#     llm = ChatOpenAI(temperature=0)
-#     tools = [wiki_tool, retriever_tool]
-#     prompt = hub.pull("hwchase17/openai-tools-agent")
-    
-#     agent = create_openai_tools_agent(llm, tools, prompt)
-#     agent_executor = AgentExecutor(agent=agent, tools=tools)
 
 # Create streamlit containers for chat history and user input
 response_container = st.container()

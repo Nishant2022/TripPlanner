@@ -64,7 +64,7 @@ def get_nearby_restaurants(latLong: str) -> str:
 
 @tool
 def get_location_info(location_id: str) -> str:
-    """A tool that returns information about a location. The input should be a location id number without extra information."""
+    """A tool that returns information about a location. The input should be a numeric location id without extra information."""
     url = f'https://api.content.tripadvisor.com/api/v1/location/{location_id}/details'
 
     headers = {"accept": "application/json"}
@@ -84,7 +84,7 @@ Amenities: {response.get("amenities", None)}
 
 @tool 
 def get_location_reviews(location_id: str) -> str:
-    """A tool that returns reviews about one given location_id. The input should be a location id number without extra information."""
+    """A tool that returns reviews about one given location_id. The input should be an 8 digit numeric location id without extra information."""
     url = f'https://api.content.tripadvisor.com/api/v1/location/{location_id}/reviews'
 
     headers = {"accept": "application/json"}
@@ -97,11 +97,13 @@ def get_location_reviews(location_id: str) -> str:
 
     if return_string == "":
         return_string = "Could not find the information requested"
+
+    print(return_string, response, location_id)
     return return_string
 
 @tool
 def get_location_photos(location_id: str) -> str:
-    """A tool that returns photos about one given location_id. The input should be a location id number without extra information."""
+    """A tool that returns photos about one given location_id. The input should be an 8 digit location id number without extra information."""
     url = f'https://api.content.tripadvisor.com/api/v1/location/{location_id}/photos'
 
     headers = {"accept": "application/json"}
@@ -109,7 +111,7 @@ def get_location_photos(location_id: str) -> str:
     response = requests.get(url, params={"key": TRIPADVISOR_API_KEY}, headers=headers).json()
     return_string = ""
 
-    for photo in response('data', []):
+    for photo in response.get('data', []):
         return_string += f"Location ID: {photo['id']}, Image: {photo['images']}, Caption: {photo['caption']}, Blessed: {photo['is_blessed']}\n"
 
     if return_string == "":
