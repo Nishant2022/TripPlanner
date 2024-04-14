@@ -130,7 +130,7 @@ if __name__ == "__main__":
         tools=tools,
         llm=llm,
         verbose=True,
-        max_iterations=40
+        max_iterations=200
     )
     
     zero_shot_agent("""I live in New York. I want to go to Mexico City for 14 days. I plan on leaving on May 1.

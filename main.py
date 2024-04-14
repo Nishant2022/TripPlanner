@@ -16,6 +16,10 @@ from tripadvisor import get_nearby_restaurants
 from tripadvisor import get_location_info
 from tripadvisor import get_location_reviews
 from tripadvisor import get_location_photos
+from flights import get_airport_id
+from flights import getFlightToken
+from flights import getFlightInfo
+
 
 from langchain import hub
 from langchain.agents import AgentExecutor, create_react_agent, create_openai_tools_agent
@@ -75,7 +79,7 @@ wiki_tool = WikipediaQueryRun(api_wrapper=api_wrapper)
 
 # Initialize a LangChain chat agent
 llm = ChatOpenAI(temperature=0)
-tools = [get_nearby_restaurants, get_nearby_hotel, get_nearby_attraction, get_location_info, get_location_reviews, get_location_photos]
+tools = [get_nearby_restaurants, get_nearby_hotel, get_nearby_attraction, get_location_info, get_location_reviews, get_location_photos, get_airport_id, getFlightToken, getFlightInfo]
 prompt = hub.pull("hwchase17/openai-tools-agent")
 
 agent = create_openai_tools_agent(llm, tools, prompt)
