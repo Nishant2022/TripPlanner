@@ -38,14 +38,12 @@ def getFlightToken(input_string: str) -> str:
         DepartureAirportID:ArrivalAirportID:DepartureDate:ReturnDate:NumAdults
         
         The dates should be in YYYY-MM-DD format. The year is 2024.
+        Provide an empty string for the return date if it is a one way trip.
     """
 
     url = "https://booking-com15.p.rapidapi.com/api/v1/flights/searchFlights"
-
-    print(input_string)
     
     Airport1ID, Airport2ID, DepartureDate, ReturnDate, Adults = input_string.split(':')
-    print(Airport1ID, Airport2ID, DepartureDate, ReturnDate, Adults)
 
     querystring = {
         "fromId": Airport1ID, 
@@ -63,17 +61,63 @@ def getFlightToken(input_string: str) -> str:
     }
 
     response = requests.get(url, headers=headers, params=querystring).json()
-    print(response)
 
     return_string = ""
     for flight in response['data']['flightDeals']:
         return_string += f"Type: {flight['key']}, Token: {flight['offerToken']}\n"
     return return_string
 
+@tool
+def getFlightInfo(flight_token: str) -> str:
+    """A function to get flight information given a flight token.
+    Below if the format of the return string:
+
+    Start location to End location:
+        Leg 1:
+        Departure Time: ...,
+        Arrival Time: ...,
+        Departure Airport: ...,
+        Departure City: ...,
+        Arrival Airport: ...,
+        Arrival City: ...,
+        Cabin Class: ...,
+        Departure Terminal: ...,
+        Arrival Terminal:...
+    """
+    url = "https://booking-com15.p.rapidapi.com/api/v1/flights/getFlightDetails"
+
+    querystring = {"token": flight_token, "currency_code": "USD"}
+
+    headers = {
+        "X-RapidAPI-Key": FLIGHT_API_KEY,
+        "X-RapidAPI-Host": "booking-com15.p.rapidapi.com"
+    }
+
+    response = requests.get(url, headers=headers, params=querystring).json()
+
+    #print(json.dumps(response, indent=2))
+    
+    return_string = f"Trip Price: ${response['data']['priceBreakdown']['total']['units']}\n"
+    for segment in response.get('data', [])['segments']:
+        return_string += f"\nFrom {segment['departureAirport']['cityName']} to {segment['arrivalAirport']['cityName']}:"
+        for leg in segment['legs']:
+            return_string += f"""
+    Departure Time: {leg['departureTime']},
+    Arrival Time: {leg['arrivalTime']},
+    Departure Airport: {leg['departureAirport']['name']},
+    Departure City: {leg['departureAirport']['cityName']},
+    Arrival Airport: {leg['arrivalAirport']['name']},
+    Arrival City: {leg['arrivalAirport']['cityName']},
+    Cabin Class: {leg['cabinClass']},
+    Departure Terminal: {leg.get('departureTerminal', None)},
+    Arrival Terminal: {leg.get('arrivalTerminal', None)}
+"""
+    return return_string
+
 if __name__ == "__main__":
     from langchain.agents import initialize_agent
     
-    tools = [get_airport_id, getFlightToken]
+    tools = [get_airport_id, getFlightToken, getFlightInfo]
     
     llm = ChatOpenAI(
         openai_api_key=os.getenv("OPENAI_API_KEY"),
@@ -89,4 +133,8 @@ if __name__ == "__main__":
         max_iterations=40
     )
     
-    zero_shot_agent("Find me the cheapest flight from New York to LA departing on April 15 and returning on April 20")
+    zero_shot_agent("""I live in New York. I want to go to Mexico City for 14 days. I plan on leaving on May 1.
+                    Can you find me the best flights? I want to know all the information there is to know about the flights you choose.
+                    I want the flight itinerary in list form.
+                    The list should have a sublist with details about any layovers.
+                    You must give me information about my flights!""")
