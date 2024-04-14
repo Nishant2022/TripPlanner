@@ -19,8 +19,11 @@ def get_nearby_attraction(latLong: str) -> str:
     response = requests.get(url, params={"latLong": latLong, "key": TRIPADVISOR_API_KEY, "category":"attractions"}, headers=headers).json()
  
     return_string = ""
-    for location in response['data']:
+    for location in response.get('data', []):
         return_string += f"Location ID: {location['location_id']}, Name: {location['name']}\n"
+
+    if return_string == "":
+        return_string = "Could not find the information requested"
     return return_string
 
 @tool
@@ -34,8 +37,11 @@ def get_nearby_hotel(latLong: str) -> str:
     response = requests.get(url, params={"latLong": latLong, "key": TRIPADVISOR_API_KEY, "category":"hotels"}, headers=headers).json()
  
     return_string = ""
-    for location in response['data']:
+    for location in response.get('data', []):
         return_string += f"Location ID: {location['location_id']}, Name: {location['name']}\n"
+
+    if return_string == "":
+        return_string = "Could not find the information requested"
     return return_string
 
 @tool
@@ -49,8 +55,11 @@ def get_nearby_restaurants(latLong: str) -> str:
     response = requests.get(url, params={"latLong": latLong, "key": TRIPADVISOR_API_KEY, "category":"restaurants"}, headers=headers).json()
  
     return_string = ""
-    for location in response['data']:
+    for location in response.get('data', []):
         return_string += f"Location ID: {location['location_id']}, Name: {location['name']}\n"
+
+    if return_string == "":
+        return_string = "Could not find the information requested"
     return return_string
 
 @tool
@@ -83,8 +92,11 @@ def get_location_reviews(location_id: str) -> str:
     response = requests.get(url, params={"key": TRIPADVISOR_API_KEY}, headers=headers).json()
     return_string = ""
 
-    for review in response['data']:
+    for review in response.get('data', []):
         return_string += f"Location ID: {review['location_id']}, Rating: {review['rating']}, Title: {review['title']}, Review: {review['text']}\n"
+
+    if return_string == "":
+        return_string = "Could not find the information requested"
     return return_string
 
 @tool
@@ -97,22 +109,25 @@ def get_location_photos(location_id: str) -> str:
     response = requests.get(url, params={"key": TRIPADVISOR_API_KEY}, headers=headers).json()
     return_string = ""
 
-    for photo in response['data']:
+    for photo in response('data', []):
         return_string += f"Location ID: {photo['id']}, Image: {photo['images']}, Caption: {photo['caption']}, Blessed: {photo['is_blessed']}\n"
+
+    if return_string == "":
+        return_string = "Could not find the information requested"
     return return_string
 
 
 if __name__ == "__main__":
     from langchain.agents import initialize_agent
-    
+
     tools = [get_nearby_attraction, get_location_info, get_nearby_hotel, get_nearby_restaurants, get_location_reviews, get_location_photos]
-    
+
     llm = ChatOpenAI(
         openai_api_key=os.getenv("OPENAI_API_KEY"),
         temperature=0,
         model_name="gpt-3.5-turbo"
     )
-    
+
     zero_shot_agent = initialize_agent(
         agent="zero-shot-react-description",
         tools=tools,
@@ -120,7 +135,7 @@ if __name__ == "__main__":
         verbose=True,
         max_iterations=40
     )
-    
+
     location = "Seattle"
     # zero_shot_agent(f"""Find me restaurants near {location}. Sort the restaurants by their rating. 
     #                 For the three highest rated restaurants, give me three reviews.
