@@ -51,11 +51,11 @@ if 'past' not in st.session_state:
     st.session_state['past'] = ["Hey"]
 
 # Create sidebar for saving locations
-st.sidebar.title("Saved Locations")
-locations = {}
-for location in locations:
-    with st.sidebar:
-        st.text(location)
+# st.sidebar.title("Saved Locations")
+# locations = {}
+# for location in locations:
+#     with st.sidebar:
+#         st.text(location)
 
 # Initialize a LangChain chat agent
 llm = ChatOpenAI(temperature=0)
