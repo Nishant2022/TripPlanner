@@ -62,9 +62,14 @@ def getFlightToken(input_string: str) -> str:
 
     response = requests.get(url, headers=headers, params=querystring).json()
 
+    if not response["status"]:
+        return "Incorrect input provided"
+
     return_string = ""
-    for flight in response['data']['flightDeals']:
+    for flight in response['data'].get('flightDeals', []):
         return_string += f"Type: {flight['key']}, Token: {flight['offerToken']}\n"
+    if return_string == "":
+        return_string = "Couldn't find flights. Please try again."
     return return_string
 
 @tool
