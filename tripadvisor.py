@@ -64,7 +64,7 @@ def get_nearby_restaurants(latLong: str) -> str:
 
 @tool
 def get_location_info(location_id: str) -> str:
-    """A tool that returns information about a location. The input should be a numeric location id without extra information."""
+    """A tool that returns information about a location. The input should be an 8 digit numeric location id without extra information."""
     url = f'https://api.content.tripadvisor.com/api/v1/location/{location_id}/details'
 
     headers = {"accept": "application/json"}
@@ -98,7 +98,6 @@ def get_location_reviews(location_id: str) -> str:
     if return_string == "":
         return_string = "Could not find the information requested"
 
-    print(return_string, response, location_id)
     return return_string
 
 @tool
