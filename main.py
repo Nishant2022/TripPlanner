@@ -98,7 +98,7 @@ if st.session_state['generated']:
     with response_container:
         for i in range(len(st.session_state['generated'])):
             message(st.session_state["past"][i], is_user=True, key=str(i) + '_user', avatar_style="fun-emoji")
-            message(st.session_state["generated"][i], key=str(i), avatar_style="bottts")
+            message(st.session_state["generated"][i], key=str(i), avatar_style="")
 
 
 # At the end of the session or when you're done with the file, clean up the temporary files
